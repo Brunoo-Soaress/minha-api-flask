@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 
 # Inicializando o Flask
 app = Flask(__name__)
@@ -15,10 +15,19 @@ filmes = [
 def index():
     return "Olá, bem-vindo à minha API!"
 
-# Rota para listar todos os filmes
-@app.route('/filmes', methods=['GET'])
+# Rota para listar todos os filmes e adicionar um novo filme
+@app.route('/filmes', methods=['GET', 'POST'])
 def listar_filmes():
-    return jsonify(filmes)
+    if request.method == 'POST':
+        novo_filme = request.json
+        if not novo_filme or not 'titulo' in novo_filme or not 'descricao' in novo_filme:
+            return jsonify({"mensagem": "Dados inválidos"}), 400
+
+        novo_filme['id'] = len(filmes) + 1
+        filmes.append(novo_filme)
+        return jsonify(novo_filme), 201
+    else:
+        return jsonify(filmes)
 
 # Rota para buscar um filme por ID
 @app.route('/filmes/<int:id>', methods=['GET'])
